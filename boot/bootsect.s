@@ -11,7 +11,7 @@ SYSSIZE = 0x3000
 ! iself out of the way to address 0x90000, and jumps there.
 !
 ! It then loads 'setup' directly after itself (0x90200), and the system
-! at 0x10000, using BIOS interrupts. 
+! at 0x10000, using BIOS interrupts.
 !
 ! NOTE! currently system is at most 8*65536 bytes long. This should be no
 ! problem, even in the future. I want to keep it simple. This 512 kB
@@ -52,15 +52,15 @@ start:
 	sub	si,si
 	sub	di,di
 	rep
-	movw
-	jmpi	go,INITSEG
+	movw                                                                          ! 将内存地址0x7c00处开始往后的512字节的数据复制到0x90000处开始的往后512字节的地方
+	jmpi	go,INITSEG                                                            ! CS=0x9000, IP=go
 go:	mov	ax,cs
 	mov	ds,ax
-	mov	es,ax
+	mov	es,ax                                                                     ! CS=0x9000, DS=0x9000, ES=0x9000
 ! put stack at 0x9ff00.
-	mov	ss,ax
-	mov	sp,#0xFF00		! arbitrary value >>512
-
+	mov	ss,ax                                                                     ! SS=0x9000
+	mov	sp,#0xFF00		! arbitrary value >>512                                   ! SS:SP=0x9FF00
+                                                                                  ! CS:IP访问代码, DS:XXX访问数据, SS:SP访问栈. 操作系统规划了如何访问数据, 代码, 栈
 ! load the setup-sectors directly after the bootblock.
 ! Note that 'es' is already set up.
 
@@ -69,7 +69,7 @@ load_setup:
 	mov	cx,#0x0002		! sector 2, track 0
 	mov	bx,#0x0200		! address = 512, in INITSEG
 	mov	ax,#0x0200+SETUPLEN	! service 2, nr of sectors
-	int	0x13			! read it
+	int	0x13			! read it                                                 ! 读取硬盘, 从硬盘的第二个扇区开始把数据加载到内存0x90200处，共加载4个扇区
 	jnc	ok_load_setup		! ok - continue
 	mov	dx,#0x0000
 	mov	ax,#0x0000		! reset the diskette
@@ -94,7 +94,7 @@ ok_load_setup:
 	mov	ah,#0x03		! read cursor pos
 	xor	bh,bh
 	int	0x10
-	
+
 	mov	cx,#24
 	mov	bx,#0x0007		! page 0, attribute 7 (normal)
 	mov	bp,#msg1
@@ -106,7 +106,7 @@ ok_load_setup:
 
 	mov	ax,#SYSSEG
 	mov	es,ax		! segment of 0x010000
-	call	read_it
+	call	read_it                                                               ! 把从硬盘第6个扇区开始往后的240个扇区加载到内存0x10000处
 	call	kill_motor
 
 ! After that we check which root-device to use. If the device is
@@ -136,7 +136,7 @@ root_defined:
 ! the setup-routine loaded directly after
 ! the bootblock:
 
-	jmpi	0,SETUPSEG
+	jmpi	0,SETUPSEG                                                            ! 将操作系统的全部代码从硬盘加载到内存后跳转到0x90200处, 对应硬盘的第2个扇区开始处的内容(setup)
 
 ! This routine loads the system at address 0x10000, making sure
 ! no 64kB boundaries are crossed. We try to load it as fast as
