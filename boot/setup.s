@@ -37,8 +37,8 @@ start:
 	mov	ds,ax
 	mov	ah,#0x03	! read cursor pos
 	xor	bh,bh
-	int	0x10		! save it in known place, con_init fetches
-	mov	[0],dx		! it from 0x90000.
+	int	0x10		! save it in known place, con_init fetches                    ! 在DX寄存器存储光标的位置, DH存储行号, DL存储列号
+	mov	[0],dx		! it from 0x90000.                                            ! 光标位置存储在内存0x90000处
 
 ! Get memory size (extended mem, kB)
 
@@ -111,7 +111,7 @@ is_disk1:
 ! first we move the system to it's rightful place
 
 	mov	ax,#0x0000
-	cld			! 'direction'=0, movs moves forward
+	cld			! 'direction'=0, movs moves forward                               ! 数据传输按地址递增方向
 do_move:
 	mov	es,ax		! destination segment
 	add	ax,#0x1000
@@ -122,7 +122,7 @@ do_move:
 	sub	si,si
 	mov 	cx,#0x8000
 	rep
-	movsw
+	movsw                                                                         ! 将内存地址0x10000处开始往后直到0x90000的内容复制到0x00000的位置
 	jmp	do_move
 
 ! then we load the segment descriptors
@@ -222,7 +222,7 @@ idt_48:
 gdt_48:
 	.word	0x800		! gdt limit=2048, 256 GDT entries
 	.word	512+gdt,0x9	! gdt base = 0X9xxxx
-	
+
 .text
 endtext:
 .data

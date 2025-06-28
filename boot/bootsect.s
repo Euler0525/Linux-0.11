@@ -52,7 +52,7 @@ start:
 	sub	si,si
 	sub	di,di
 	rep
-	movw                                                                          ! 将内存地址0x7c00处开始往后的512字节的数据复制到0x90000处开始的往后512字节的地方
+	movw                                                                          ! 将内存地址0x7c00处开始往后的512字节的数据复制到0x90000处开始的往后512字节的地方(bootsect)
 	jmpi	go,INITSEG                                                            ! CS=0x9000, IP=go
 go:	mov	ax,cs
 	mov	ds,ax
@@ -69,7 +69,7 @@ load_setup:
 	mov	cx,#0x0002		! sector 2, track 0
 	mov	bx,#0x0200		! address = 512, in INITSEG
 	mov	ax,#0x0200+SETUPLEN	! service 2, nr of sectors
-	int	0x13			! read it                                                 ! 读取硬盘, 从硬盘的第二个扇区开始把数据加载到内存0x90200处，共加载4个扇区
+	int	0x13			! read it                                                 ! 读取硬盘, 从硬盘的第二个扇区开始把数据加载到内存0x90200处，共加载4个扇区(setup)
 	jnc	ok_load_setup		! ok - continue
 	mov	dx,#0x0000
 	mov	ax,#0x0000		! reset the diskette
@@ -106,7 +106,7 @@ ok_load_setup:
 
 	mov	ax,#SYSSEG
 	mov	es,ax		! segment of 0x010000
-	call	read_it                                                               ! 把从硬盘第6个扇区开始往后的240个扇区加载到内存0x10000处
+	call	read_it                                                               ! 把从硬盘第6个扇区开始往后的240个扇区加载到内存0x10000处(system)
 	call	kill_motor
 
 ! After that we check which root-device to use. If the device is
