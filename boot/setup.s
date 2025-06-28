@@ -139,7 +139,7 @@ end_move:
 	mov	al,#0xD1		! command write
 	out	#0x64,al
 	call	empty_8042
-	mov	al,#0xDF		! A20 on
+	mov	al,#0xDF		! A20 on                                                  ! 打开A20地址线, 突破地址信号线20位的宽度, 变成32位可用
 	out	#0x60,al
 	call	empty_8042
 
@@ -189,8 +189,8 @@ end_move:
 ! absolute address 0x00000, in 32-bit protected mode.
 
 	mov	ax,#0x0001	! protected mode (PE) bit
-	lmsw	ax		! This is it!
-	jmpi	0,8		! jmp offset 0 of segment 8 (cs)
+	lmsw	ax		! This is it!                                                 ! 机器状态字寄存器cr0的低位(PE)置1, 开启保护模式
+	jmpi	0,8		! jmp offset 0 of segment 8 (cs)                              ! CS=8, IP=0. 0000_0000_0000_1000, 描述符索引为1, 去GDT中找索引为1的描述符, 最终跳转到内存的零地址处, 执行head, main等模块
 
 ! This routine checks that the keyboard command queue is empty
 ! No timeout is used - if this hangs there is something wrong with
@@ -202,7 +202,7 @@ empty_8042:
 	jnz	empty_8042	! yes - loop
 	ret
 
-gdt:
+gdt:                                                                              !//TODO
 	.word	0,0,0,0		! dummy
 
 	.word	0x07FF		! 8Mb - limit=2047 (2048*4096=8Mb)
@@ -220,8 +220,8 @@ idt_48:
 	.word	0,0			! idt base=0L
 
 gdt_48:
-	.word	0x800		! gdt limit=2048, 256 GDT entries
-	.word	512+gdt,0x9	! gdt base = 0X9xxxx
+	.word	0x800		! gdt limit=2048, 256 GDT entries                         !
+	.word	512+gdt,0x9	! gdt base = 0X9xxxx                                      ! setup在0x90200的位置, gdt表示setup内的偏移量
 
 .text
 endtext:
