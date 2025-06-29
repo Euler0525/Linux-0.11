@@ -60,6 +60,8 @@ static unsigned char mem_map[PAGING_PAGES] = {
 /*
  * Get physical address of first (actually last :-) free page, and mark it
  * used. If no free pages left, return 0.
+ *
+ * 在主内存中申请1页空闲内存，并返回物理内存页的其实地址
  */
 unsigned long get_free_page(void) {
     register unsigned long __res asm("ax");
@@ -387,6 +389,15 @@ void do_no_page(unsigned long error_code, unsigned long address) {
     oom();
 }
 
+/**
+ * @brief
+ * @param  start_mem
+ * @param  end_mem
+ *
+ * @details 数组mem_map中的每个元素表示1页内存(4KB)是否空闲
+ *          1MB以下是内核代码所在的位置, 没有权限管理(申请或释放)
+ *          缓冲区直接标记为USED, 不能再被分配
+ */
 void mem_init(long start_mem, long end_mem) {
     int i;
 
