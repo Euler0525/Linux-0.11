@@ -13,7 +13,7 @@
  */
 .text
 .globl _idt,_gdt,_pg_dir,_tmp_floppy_area
-_pg_dir:
+_pg_dir:                                                                          ! 页目录
 startup_32:
 	movl $0x10,%eax
 	mov %ax,%ds
@@ -137,7 +137,7 @@ after_page_tables:
 	pushl $0
 	pushl $0
 	pushl $L6		# return address for main, if it decides to.
-	pushl $_main
+	pushl $_main                                                                  ! 开启分页机制并跳转到main函数
 	jmp setup_paging
 L6:
 	jmp L6			# main should never return here, but
