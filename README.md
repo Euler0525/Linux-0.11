@@ -159,6 +159,40 @@ graph TD
 A(开机)-->B(加载启动区)-->C(加载setup.s)-->D(加载内核)-->E(分段机制)-->F(进入保护模式)-->G(中断机制)-->H(分页机制)-->I(跳转到内核)
 ```
 
+---
+
+```c
+/*
+ * kernel/blk_drv/blk.h
+ *
+ * Ok, this is an expanded form so that we can use the same
+ * request for paging requests when that is implemented. In
+ * paging, 'bh' is NULL, and 'waiting' is used to wait for
+ * read/write completion.
+ */
+struct request {
+    int dev; /* -1 if no request */
+    int cmd; /* READ or WRITE */
+    int errors;
+    unsigned long sector;
+    unsigned long nr_sectors;
+    char *buffer;
+    struct task_struct *waiting;
+    struct buffer_head *bh;
+    struct request *next;
+};
+```
+
+- `dev`：设备号，-1表示空闲；
+- `cmd`：读写命令；
+- `errors`：操作时产生的错误次数；
+- `sector`起始扇区；
+- `nr_sectors`：扇区数
+- `buffer`：数据缓冲区（读盘之后数据在内存中存放的位置）
+- `waiting`：表示发起请求的进程；
+- `bh`：缓冲区头指针；
+- `next`：下一个请求项；
+
 ## 参考资料
 
 [Linux源码趣读](https://book.douban.com/subject/36573361/)
