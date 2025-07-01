@@ -13,7 +13,7 @@
             "movw %%ax,%%gs" ::                                                \
                 : "ax")
 
-#define sti() __asm__("sti" ::)
+#define sti() __asm__("sti" ::) // Allow interruption
 #define cli() __asm__("cli" ::)
 #define nop() __asm__("nop" ::)
 

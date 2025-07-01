@@ -160,13 +160,14 @@ void do_reserved(long esp, long error_code) {
     die("reserved (15,17-47) error", esp, error_code);
 }
 
+// Update IDT
 void trap_init(void) {
     int i;
 
-    set_trap_gate(0, &divide_error);
+    set_trap_gate(0, &divide_error); // 用户态
     set_trap_gate(1, &debug);
     set_trap_gate(2, &nmi);
-    set_system_gate(3, &int3); /* int3-5 can be called from all */
+    set_system_gate(3, &int3); /* int3-5 can be called from all */ // 内核态
     set_system_gate(4, &overflow);
     set_system_gate(5, &bounds);
     set_trap_gate(6, &invalid_op);
