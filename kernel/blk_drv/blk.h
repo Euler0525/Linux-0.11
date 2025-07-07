@@ -20,9 +20,9 @@
  * paging, 'bh' is NULL, and 'waiting' is used to wait for
  * read/write completion.
  */
-struct request {
-    int dev; /* -1 if no request */
-    int cmd; /* READ or WRITE */
+struct request { // mem buffer <---> blk dev
+    int dev;     /* -1 if no request */
+    int cmd;     /* READ or WRITE */
     int errors;
     unsigned long sector;
     unsigned long nr_sectors;
