@@ -36,7 +36,7 @@
  * These are set up by the setup-routine at boot-time:
  */
 
-#define ORIG_X (*(unsigned char *)0x90000)
+#define ORIG_X (*(unsigned char *)0x90000) // Cursor position(setup)
 #define ORIG_Y (*(unsigned char *)0x90001)
 #define ORIG_VIDEO_PAGE (*(unsigned short *)0x90004)
 #define ORIG_VIDEO_MODE ((*(unsigned short *)0x90006) & 0xff)
@@ -102,6 +102,9 @@ static inline void set_origin(void) {
     sti();
 }
 
+/**
+ * @brief Scroll the content up one line.
+ */
 static void scrup(void) {
     if (video_type == VIDEO_TYPE_EGAC || video_type == VIDEO_TYPE_EGAM) {
         if (!top && bottom == video_num_lines) {
@@ -423,6 +426,8 @@ void con_write(struct tty_struct *tty) {
         switch (state) {
         case 0:
             if (c > 31 && c < 127) {
+                // The column number is greater than the total number of
+                // columns.
                 if (x >= video_num_columns) {
                     x -= video_num_columns;
                     pos -= video_size_row;
@@ -605,6 +610,7 @@ void con_init(void) {
     char *display_desc = "????";
     char *display_ptr;
 
+    // Get information related to display modes
     video_num_columns = ORIG_VIDEO_COLS;
     video_size_row = video_num_columns * 2;
     video_num_lines = ORIG_VIDEO_LINES;
@@ -613,6 +619,7 @@ void con_init(void) {
 
     if (ORIG_VIDEO_MODE == 7) /* Is this a monochrome display? */
     {
+        // Memory area of the video memory mapping
         video_mem_start = 0xb0000;
         video_port_reg = 0x3b4;
         video_port_val = 0x3b5;
@@ -627,6 +634,7 @@ void con_init(void) {
         }
     } else /* If not, it is color. */
     {
+        // Memory area of the video memory mapping
         video_mem_start = 0xb8000;
         video_port_reg = 0x3d4;
         video_port_val = 0x3d5;
@@ -656,6 +664,7 @@ void con_init(void) {
     top = 0;
     bottom = video_num_lines;
 
+    // Position the cursor and enable keyboard interrupts.
     gotoxy(ORIG_X, ORIG_Y);
     set_trap_gate(0x21, &keyboard_interrupt); // Keyboard takes effect
     outb_p(inb_p(0x21) & 0xfd, 0x21);
